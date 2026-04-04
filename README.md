@@ -9,7 +9,9 @@
 
 ## 📖 Overview
 
-This repository contains a **production-grade DevOps platform** demonstrating advanced Kubernetes deployment strategies on AWS EKS. It is built to be a fully resilient, self-healing system that can detect and automatically recover from unexpected pod crashes and extreme traffic spikes.
+> **"I didn't just 'use AWS'. I built a system that detects failures and recovers automatically."**
+
+This repository contains a **production-grade DevOps platform** demonstrating advanced Kubernetes deployment strategies. Rather than simply hosting an application, this project proves the ability to architect a fully resilient, self-healing system that autonomously monitors its own health, reacts to unexpected crashes, and dynamically scales resources during extreme traffic spikes without manual intervention.
 
 ## 🏗️ Architecture & Features
 
