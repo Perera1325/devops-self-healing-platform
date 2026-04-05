@@ -16,9 +16,15 @@ spec:
     spec:
       containers:
       - name: nginx
-        image: nginx:latest
+        image: ${DOCKERHUB_USERNAME}/self-healing-platform:latest
         ports:
         - containerPort: 80
+        env:
+        - name: APP_COLOR
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: app-color
         # Simulated resources for HPA
         resources:
           requests:
@@ -30,7 +36,7 @@ spec:
         # Liveness Probe: Restarts the pod if it goes into a broken internal state
         livenessProbe:
           httpGet:
-            path: /
+            path: /healthz
             port: 80
           initialDelaySeconds: 15
           periodSeconds: 10

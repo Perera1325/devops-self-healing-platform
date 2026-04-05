@@ -1,0 +1,12 @@
+{
+  "name": "devops-self-healing-app",
+  "version": "1.0.0",
+  "description": "Simple app for DevOps self-healing platform",
+  "main": "app.js",
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "scripts": {
+    "start": "node app.js"
+  }
+}
