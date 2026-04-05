@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: nginx
-        image: ${DOCKERHUB_USERNAME}/self-healing-platform:latest
+        image: ghcr.io/perera1325/self-healing-platform:latest
         ports:
         - containerPort: 80
         env:
