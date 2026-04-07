@@ -151,6 +151,56 @@ aws eks update-kubeconfig --name devops-cluster --region <your-region>
 
 ---
 
+## 🏗️ System Architecture
+
+Our platform follows a cloud-native, self-healing, and autoscaling architecture:
+**GitHub** → **GitHub Actions (CI/CD)** → **Amazon EKS** → **Kubernetes Manifests** → **AWS Application Load Balancer (ALB)**
+
+1. **Self-Healing**: Kubernetes Liveness/Readiness probes detect and recover failing containers.
+2. **Auto Scaling**: Horizontal Pod Autoscaler (HPA) dynamically adjusts pod count based on CPU load.
+3. **Monitoring**: Prometheus captures cluster metrics and provides real-time observability.
+4. **Reliability**: Resource limits and requests ensure stable performance and prevent resource exhaustion.
+
+---
+
+## 📈 Auto Scaling Strategy (HPA)
+
+The platform is configured with a **Horizontal Pod Autoscaler**:
+- **Target CPU Utilization**: 50%
+- **Scaling Range**: Min 2 Pods, Max 5 Pods
+
+### 🔧 Prerequisite: Metrics Server
+Ensure the Metrics Server is installed in your cluster:
+```bash
+kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+```
+
+---
+
+## 🧪 Production Failure Simulation (Stress Test)
+
+To verify the **Horizontal Pod Autoscaling**:
+1. **Apply Load**:
+   ```bash
+   kubectl run stress --image=busybox -- /bin/sh -c "while true; do wget -q -O- http://nginx-service; done"
+   ```
+2. **Monitor Scaling**:
+   ```bash
+   kubectl get hpa nginx-hpa -w
+   kubectl get pods -l app=nginx -w
+   ```
+3. **Analysis**: You will observe the pod count increase from 2 to 5 as CPU utilization crosses the 50% threshold.
+
+---
+
+## 🔍 Observability & Debugging
+
+- **Check Logs**: `kubectl logs deployment/nginx-deployment`
+- **Inspect Pod Details**: `kubectl describe pod <pod-name>`
+- **View Monitoring**: Access the Prometheus dashboard on port 9090.
+
+---
+
 ## 🌐 Documentation
 - [**Architecture Deep Dive**](docs/architecture.md)
 - [**Self-Healing Logic Flow**](docs/self-healing-flow.md)

@@ -27,13 +27,13 @@ spec:
             secretKeyRef:
               name: app-secrets
               key: app-color
-        # Simulated resources for HPA
+        # Production-grade Resource Limits & Requests
         resources:
           requests:
             cpu: "100m"
             memory: "128Mi"
           limits:
-            cpu: "250m"
+            cpu: "500m"
             memory: "256Mi"
         # Liveness Probe: Restarts the pod if it goes into a broken internal state
         livenessProbe:
