@@ -72,6 +72,7 @@ jobs:
         run: |
           # Apply manifests
           kubectl apply -f k8s/
+          kubectl apply -f monitoring/
           
           # Trigger image rollout with specific SHA
           kubectl set image deployment/nginx-deployment nginx=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}

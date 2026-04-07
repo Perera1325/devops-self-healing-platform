@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-alert-rules
+data:
+  alert-rules.yaml: |
+    groups:
+    - name: devops-self-healing
+      rules:
+      - alert: PodDown
+        expr: up{app="nginx"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Nginx Pod is down"
+          description: "An Nginx pod has been down for more than 1 minute."
