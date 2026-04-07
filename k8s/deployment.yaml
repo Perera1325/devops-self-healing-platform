@@ -14,6 +14,8 @@ spec:
       labels:
         app: nginx
     spec:
+      imagePullSecrets:
+      - name: ghcr-login
       containers:
       - name: nginx
         image: ghcr.io/perera1325/self-healing-platform:latest
