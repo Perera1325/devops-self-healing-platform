@@ -54,11 +54,11 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ap-south-1  # Hardcoded to bypass secret issues
+          aws-region: eu-north-1  # Updated to the correct cluster region
 
       - name: Update Kubeconfig
         run: |
-          aws eks update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }} --region ap-south-1
+          aws eks update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }} --region eu-north-1
 
       - name: Create GHCR Login Secret
         run: |
