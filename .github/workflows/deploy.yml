@@ -49,23 +49,16 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Verify Secret Format
-        run: |
-          # This checks if the region looks correct without trailing spaces
-          echo "Checking region format..."
-          if [[ "${{ secrets.AWS_REGION }}" =~ \  ]]; then echo "❌ Space detected in AWS_REGION"; exit 1; fi
-          echo "✅ Region format looks good."
-
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          aws-region: ap-south-1  # Hardcoded to bypass secret issues
 
       - name: Update Kubeconfig
         run: |
-          aws eks update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }} --region ${{ secrets.AWS_REGION }}
+          aws eks update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }} --region ap-south-1
 
       - name: Create GHCR Login Secret
         run: |
