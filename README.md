@@ -102,14 +102,14 @@ kubectl get hpa -w
 
 ## Screenshots
 
-*(Placeholder: Kubernetes Pods Running)*
-![Kubernetes Pods](https://via.placeholder.com/800x400.png?text=Kubernetes+Pods+State)
+*(Kubernetes Pods Running & Configuration)*
+![Kubernetes Pods](docs/screenshots/kubernetes-deployment.png)
 
-*(Placeholder: HPA Scaling during Stress Test)*
-![HPA Scaling](https://via.placeholder.com/800x400.png?text=Horizontal+Pod+Autoscaler)
+*(Workflow Execution Success)*
+![CI/CD Pipeline](docs/screenshots/hpa-scaling.png)
 
-*(Placeholder: CI/CD Pipeline Success)*
-![CI/CD Pipeline](https://via.placeholder.com/800x400.png?text=GitHub+Actions+Pipeline)
+*(Deploy to Kubernetes Logs - Final Verification)*
+![Deploy to EKS](docs/screenshots/ci-cd-pipeline.png)
 
 ## Future Improvements
 - **Grafana Dashboards:** Integrate Grafana to dynamically visualize Prometheus metrics on a dedicated web interface.
