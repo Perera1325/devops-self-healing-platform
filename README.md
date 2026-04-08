@@ -1,206 +1,117 @@
-# 🚀 DevOps Self-Healing Platform (AWS EKS + Kubernetes)
+# Self-Healing Platform on Kubernetes (AWS EKS)
 
-[![AWS EKS](https://img.shields.io/badge/AWS-EKS-FF9900?logo=amazonaws&style=for-the-badge)](https://aws.amazon.com/eks/)
-[![Kubernetes](https://img.shields.io/badge/Kubernetes-326CE5?logo=kubernetes&style=for-the-badge)](https://kubernetes.io/)
-[![Terraform](https://img.shields.io/badge/Terraform-7B42BC?logo=terraform&style=for-the-badge)](https://www.terraform.io/)
-[![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?logo=github-actions&style=for-the-badge)](https://github.com/features/actions)
-[![Prometheus](https://img.shields.io/badge/Prometheus-E6522C?logo=prometheus&style=for-the-badge)](https://prometheus.io/)
-[![Grafana](https://img.shields.io/badge/Grafana-F46800?logo=grafana&style=for-the-badge)](https://grafana.com/)
-[![Status](https://img.shields.io/badge/Project-Production_Grade-brightgreen?style=for-the-badge)](#)
+## Overview
+This project presents a robust, enterprise-grade cloud-native platform deployed on Amazon Elastic Kubernetes Service (EKS). The core objective is to showcase a **Self-Healing and Auto-Scaling Infrastructure**, simulating a production environment where system uptime and reliability are paramount.
 
-## 📖 Overview
+In modern cloud architecture, systems must be resilient to unexpected failures, traffic spikes, and application crashes. This platform implements automated recovery mechanisms (self-healing) to detect unresponsiveness and instantly replace failing containers without human intervention, ensuring high availability and seamless user experiences.
 
-> **"I didn't just 'use AWS'. I built an autonomous system that detects failures and recovers without human intervention."**
-
-This is a production-grade **Self-Healing Platform** designed to showcase advanced DevOps engineering. It goes beyond basic deployment by implementing an autonomous feedback loop that monitors application health, intercepts failures, and dynamically scales resources based on real-time traffic demand.
-
----
-
-## 🛠️ Technology Stack
-
-| Category | Tools |
-| :--- | :--- |
-| **Cloud Infrastructure** | AWS (EKS, VPC, NLB, IAM) |
-| **Infrastructure as Code** | Terraform |
-| **Containerization** | Docker, GitHub Container Registry (GHCR) |
-| **Orchestration** | Kubernetes |
-| **CI/CD Pipeline** | GitHub Actions |
-| **Observability** | Prometheus, Grafana |
-| **Security** | Kubernetes Secrets, OIDC |
-
----
-
-## 🏗️ Architecture & Flow
-
-### System Architecture
-```mermaid
-graph TD
-    User([External User]) -->|HTTP Traffic| NLB[AWS Network Load Balancer]
-    NLB -->|Routes to Healthy Pods| TargetGroup[AWS Target Group]
-    
-    subgraph EKS_Cluster [AWS EKS Cluster]
-        ALBC[AWS Load Balancer Controller]
-        MS[Metrics Server]
-        
-        subgraph Monitoring_Namespace [Monitoring Namespace]
-            Prom[Prometheus]
-            Graf[Grafana UI]
-        end
-        
-        subgraph App_Namespace [Application Namespace]
-            Svc[Node.js Service] -->|Selector: app=nginx| Pods
-            
-            Pods{App Pods}
-            HPA[Horizontal Pod Autoscaler] -.->|Scales Replicas| Pods
-            
-            Probes{Liveness / Readiness Probes} -.->|Self-Heals| Pods
-        end
-        
-        MS -.->|Aggregates Stats| HPA
-        Prom -.->|Scrapes Metrics| MS
-        Graf -.->|Visualizes Data| Prom
-    end
-```
-
-### CI/CD Pipeline (GitHub Actions + GHCR)
-```mermaid
-graph LR
-    Dev[Developer] -->|Push to Main| GH[GitHub Repo]
-    GH -->|Trigger| GHA[GitHub Actions]
-    
-    subgraph GHA_Workflow [Automated Pipeline]
-        Build[Build Docker Image] --> Push[Push to GHCR]
-        Push --> Deploy[Deploy to AWS EKS]
-    end
-    
-    Deploy -->|kubectl apply & set image| Pods{Updated Pods}
-```
-
----
-
-## 🛡️ Core Capabilities
-
-### 1. 🩺 Autonomous Self-Healing
-- **Liveness Probes**: Automatically restarts a container if it enters a deadlock or fatal state.
-- **Readiness Probes**: Ensures zero-downtime deployments by only routing traffic to pods that are fully initialized.
-- **Auto-Recovery**: Leveraging Kubernetes `ReplicaSets` to maintain the desired state (2 replicas) even during node failures.
-
-### 2. 📈 Elastic Scalability
-- **Horizontal Pod Autoscaling (HPA)**: Dynamically scales from **2 to 10 replicas** based on CPU thresholds (>50%), ensuring performance during traffic spikes.
-
-### 3. 🔍 Full-Stack Observability
-- **Prometheus**: Scrapes metrics from the cluster and application.
-- **Grafana**: Provides a "Single Pane of Glass" to visualize cluster health and traffic patterns.
-- **Intelligent Alerting**: Configured to notify on high latency or sustained pod restarts.
-
----
-
-## 📁 Repository Structure
+## Architecture
 
 ```text
+GitHub → GitHub Actions (CI/CD) → AWS EKS → Kubernetes → LoadBalancer → Users
+```
+
+## Features
+- **Automated CI/CD Pipeline:** GitHub Actions automatically builds, packages, and deploys updates directly to the AWS EKS cluster upon new commits.
+- **Self-Healing (Pod Restart):** Automated container recovery mechanisms constantly monitor application health and instantly replace crashed or hanging pods.
+- **Auto Scaling (HPA):** Horizontal Pod Autoscaler dynamically provisions additional application replicas during traffic spikes (scaling from 2 to 5 pods based on CPU utilization).
+- **Health Checks:** Granular Liveness and Readiness probes guarantee that traffic is only routed to fully operational containers.
+- **Monitoring:** Integrated Prometheus stack continuously tracks cluster metrics, CPU usage, and pod availability.
+
+## Tech Stack
+- **AWS EKS** (Elastic Kubernetes Service)
+- **Kubernetes** (Orchestration, HPA, Probes)
+- **Docker** (Containerization)
+- **GitHub Actions** (Continuous Integration & Continuous Deployment)
+- **Prometheus** (Monitoring & Alerting)
+
+## Project Structure
+```text
 /
-├── .github/workflows/  # CI/CD Pipeline (GHCR + EKS)
-├── app/                # Node.js Application Source
-├── infrastructure/     # IaC (Terraform) for EKS Cluster
-├── k8s/                # Kubernetes Manifests (Deployment, Service, HPA)
-├── monitoring/         # Observability (Prometheus/Grafana Configs)
-├── argocd/             # GitOps Manifests (Future Roadmap)
-└── docs/               # Technical Deep Dives
+├── app/
+│   └── Dockerfile                 # Application packaging
+├── k8s/
+│   ├── deployment.yaml            # Workload definitions & Health probes
+│   ├── service.yaml               # LoadBalancer configuration
+│   └── hpa.yaml                   # Horizontal Pod Autoscaling rules
+├── monitoring/
+│   ├── alert-rules.yaml           # Alert triggers (e.g., PodDown)
+│   ├── prometheus-deployment.yaml # Prometheus server 
+│   └── prometheus-service.yaml    # Internal metrics exposure
+└── .github/workflows/
+    └── deploy.yml                 # Automated deployment pipeline
 ```
 
----
+## Setup Instructions
 
-## 🚀 Setup & Deployment
-
-### 1. Provision Cluster (Terraform)
+**1. Clone the repository:**
 ```bash
-cd infrastructure/terraform
-terraform init
-terraform apply
+git clone https://github.com/Perera1325/devops-self-healing-platform.git
+cd devops-self-healing-platform
 ```
 
-### 2. Configure AWS Access
+**2. Configure AWS context:**
 ```bash
-aws eks update-kubeconfig --name devops-cluster --region <your-region>
+aws eks update-kubeconfig --region eu-north-1 --name devops-cluster
 ```
 
-### 3. CI/CD Activation
-1.  **GitHub Secrets**: Populate the following in your repo:
-    - `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`
-    - `EKS_CLUSTER_NAME`
-2.  **Push to main**: Any push triggers an automated build/test/deploy cycle.
-
----
-
-## 🧪 Verification Scenarios
-
-| Scenario | Action | Expected Result |
-| :--- | :--- | :--- |
-| **Pod Crash** | `kubectl delete pod...` | K8s recreates the pod immediately. |
-| **App Lockup** | Hit `/fail` endpoint | Liveness probe fails; container restarts. |
-| **High Load** | Run load-generator | HPA scales replicas from 2 up to 10. |
-| **New Version** | Git Push Main | Rolling update with zero downtime. |
-
----
-
-## 🗺️ Roadmap & Future Enhancements
-
-- [ ] **GitOps with ArgoCD**: Implementing continuous delivery via GitOps patterns.
-- [ ] **Custom Self-Healing Engine**: A Go-based operator for more complex recovery logic.
-- [ ] **Service Mesh (Istio)**: For advanced traffic splitting and mTLS.
-
----
-
-## 🏗️ System Architecture
-
-Our platform follows a cloud-native, self-healing, and autoscaling architecture:
-**GitHub** → **GitHub Actions (CI/CD)** → **Amazon EKS** → **Kubernetes Manifests** → **AWS Application Load Balancer (ALB)**
-
-1. **Self-Healing**: Kubernetes Liveness/Readiness probes detect and recover failing containers.
-2. **Auto Scaling**: Horizontal Pod Autoscaler (HPA) dynamically adjusts pod count based on CPU load.
-3. **Monitoring**: Prometheus captures cluster metrics and provides real-time observability.
-4. **Reliability**: Resource limits and requests ensure stable performance and prevent resource exhaustion.
-
----
-
-## 📈 Auto Scaling Strategy (HPA)
-
-The platform is configured with a **Horizontal Pod Autoscaler**:
-- **Target CPU Utilization**: 50%
-- **Scaling Range**: Min 2 Pods, Max 5 Pods
-
-### 🔧 Prerequisite: Metrics Server
-Ensure the Metrics Server is installed in your cluster:
+**3. Deploy the application:**
 ```bash
-kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+kubectl apply -f k8s/
 ```
 
----
+**4. Deploy the monitoring stack:**
+```bash
+kubectl apply -f monitoring/
+```
 
-## 🧪 Production Failure Simulation (Stress Test)
+**5. Verify deployment:**
+```bash
+kubectl get pods,svc,hpa
+```
 
-To verify the **Horizontal Pod Autoscaling**:
-1. **Apply Load**:
-   ```bash
-   kubectl run stress --image=busybox -- /bin/sh -c "while true; do wget -q -O- http://nginx-service; done"
-   ```
-2. **Monitor Scaling**:
-   ```bash
-   kubectl get hpa nginx-hpa -w
-   kubectl get pods -l app=nginx -w
-   ```
-3. **Analysis**: You will observe the pod count increase from 2 to 5 as CPU utilization crosses the 50% threshold.
+## Demo Steps
 
----
+**1. Deploy Application**
+Verify the baseline deployment is active with 2 replicas:
+```bash
+kubectl get pods -l app=nginx
+```
 
-## 🔍 Observability & Debugging
+**2. Kill Pod (Simulate Failure)**
+Delete a serving pod to simulate a crash:
+```bash
+kubectl delete pod <nginx-pod-name>
+```
 
-- **Check Logs**: `kubectl logs deployment/nginx-deployment`
-- **Inspect Pod Details**: `kubectl describe pod <pod-name>`
-- **View Monitoring**: Access the Prometheus dashboard on port 9090.
+**3. Observe Recovery**
+Watch Kubernetes instantly detect the missing pod and spin up a new healthy replacement:
+```bash
+kubectl get pods -w
+```
 
----
+**4. Trigger Scaling (Stress Test)**
+Apply artificial CPU load to trigger the Horizontal Pod Autoscaler:
+```bash
+kubectl run stress --image=busybox -- /bin/sh -c "while true; do wget -q -O- http://nginx-service; done"
+```
+Monitor the HPA expanding replicas from 2 up to 5:
+```bash
+kubectl get hpa -w
+```
 
-## 🌐 Documentation
-- [**Architecture Deep Dive**](docs/architecture.md)
-- [**Self-Healing Logic Flow**](docs/self-healing-flow.md)
+## Screenshots
+
+*(Placeholder: Kubernetes Pods Running)*
+![Kubernetes Pods](https://via.placeholder.com/800x400.png?text=Kubernetes+Pods+State)
+
+*(Placeholder: HPA Scaling during Stress Test)*
+![HPA Scaling](https://via.placeholder.com/800x400.png?text=Horizontal+Pod+Autoscaler)
+
+*(Placeholder: CI/CD Pipeline Success)*
+![CI/CD Pipeline](https://via.placeholder.com/800x400.png?text=GitHub+Actions+Pipeline)
+
+## Future Improvements
+- **Grafana Dashboards:** Integrate Grafana to dynamically visualize Prometheus metrics on a dedicated web interface.
+- **Alerting System:** Configure Alertmanager to send Slack or email notifications based on Prometheus rules.
+- **Microservices Architecture:** Evolve the monolithic backend into decoupled microservices with dedicated routing via Istio Service Mesh.
