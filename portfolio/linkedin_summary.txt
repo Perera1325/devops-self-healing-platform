@@ -1,0 +1,21 @@
+I’m excited to share my latest personal project: a Self-Healing Platform built on Kubernetes! 🚀
+
+As I continue to expand my skills in Cloud Architecture and DevOps, I wanted to build a system that doesn't just run, but actively maintains its own health and stability. 
+
+I designed and deployed a cloud-native infrastructure on AWS EKS that automatically scales to handle traffic spikes and instantly recovers from unexpected failures. 
+
+🛠️ Key Technologies Used:
+• Amazon EKS (Kubernetes)
+• Docker
+• GitHub Actions
+• Prometheus
+
+💡 Key Outcomes:
+• Automated the full deployment lifecycle with a robust CI/CD pipeline.
+• Implemented self-healing mechanics (Liveness/Readiness probes) to ensure high availability and zero-downtime recovery.
+• Configured Auto-Scaling (HPA) to dynamically allocate resources based on real-time CPU metric tracking.
+• Gained hands-on experience in building enterprise-grade resilience.
+
+Check out the full architecture and source code on my GitHub! (Link in comments)
+
+#DevOps #Kubernetes #AWS #CloudComputing #ContinuousIntegration #SRE #GitHubActions
