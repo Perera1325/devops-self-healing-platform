@@ -1,0 +1,5 @@
+- **Designed and deployed** a highly available, cloud-native application infrastructure using **Amazon EKS (Kubernetes)**, significantly enhancing service reliability and scalability.
+- **Implemented** robust **self-healing mechanisms** utilizing Kubernetes Liveness and Readiness probes, reducing system downtime by automatically detecting failures and restarting unhealthy pods in under 15 seconds.
+- **Automated** continuous integration and deployment (CI/CD) workflows with **GitHub Actions**, achieving zero-downtime rolling updates and streamlining the delivery pipeline.
+- **Configured** a **Horizontal Pod Autoscaler (HPA)** to dynamically scale application resources based on real-time CPU utilization, ensuring consistent performance during traffic spikes.
+- **Deployed** a foundational observability stack using **Prometheus** for cluster-wide metric collection and proactive health monitoring.
