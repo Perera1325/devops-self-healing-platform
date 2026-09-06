@@ -10,12 +10,13 @@ env:
   IMAGE_NAME: perera1325/self-healing-platform
   AWS_REGION: eu-north-1
   EKS_CLUSTER_NAME: devops-cluster
+  AWS_ROLE_ARN: arn:aws:iam::127730655048:role/GitHubActions-EKS-Deploy
 
 jobs:
 
-  # ============================================================
-  # BUILD & PUSH DOCKER IMAGE
-  # ============================================================
+  # ==========================================
+  # BUILD AND PUSH DOCKER IMAGE
+  # ==========================================
   build:
     name: Build and Push Docker Image
     runs-on: ubuntu-latest
@@ -46,9 +47,9 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
 
-  # ============================================================
+  # ==========================================
   # DEPLOY TO EKS
-  # ============================================================
+  # ==========================================
   deploy:
     name: Deploy to EKS
     needs: build
@@ -57,98 +58,98 @@ jobs:
     permissions:
       contents: read
       packages: read
+      id-token: write
 
     steps:
 
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # ----------------------------------------------------------
-      # Configure AWS
-      # ----------------------------------------------------------
+
+      # ======================================
+      # AUTHENTICATE TO AWS USING OIDC
+      # ======================================
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
-      # ----------------------------------------------------------
-      # Check AWS Identity
-      # ----------------------------------------------------------
-      - name: Verify AWS Identity
+
+      # ======================================
+      # CHECK AWS IDENTITY
+      # ======================================
+      - name: Check AWS Identity
         run: |
           aws sts get-caller-identity
 
-      # ----------------------------------------------------------
-      # Check EKS Cluster
-      # ----------------------------------------------------------
-      - name: Verify EKS Cluster
-        run: |
-          aws eks describe-cluster \
-            --name ${{ env.EKS_CLUSTER_NAME }} \
-            --region ${{ env.AWS_REGION }}
 
-      # ----------------------------------------------------------
-      # Configure Kubernetes
-      # ----------------------------------------------------------
+      # ======================================
+      # UPDATE KUBECONFIG
+      # ======================================
       - name: Update Kubeconfig
         run: |
           aws eks update-kubeconfig \
             --name ${{ env.EKS_CLUSTER_NAME }} \
             --region ${{ env.AWS_REGION }}
 
-      # ----------------------------------------------------------
-      # Test Kubernetes Authentication
-      # ----------------------------------------------------------
-      - name: Test Kubernetes Connection
-        run: |
-          kubectl cluster-info
-          kubectl get nodes
 
-      # ----------------------------------------------------------
-      # Create GHCR Secret
-      # ----------------------------------------------------------
+      # ======================================
+      # CHECK EKS ACCESS
+      # ======================================
+      - name: Check Kubernetes Access
+        run: |
+          kubectl get nodes
+          kubectl get pods -n default
+
+
+      # ======================================
+      # CREATE GHCR LOGIN SECRET
+      # ======================================
       - name: Create GHCR Login Secret
         run: |
           kubectl create secret docker-registry ghcr-login \
             --docker-server=${{ env.REGISTRY }} \
             --docker-username=${{ github.actor }} \
             --docker-password=${{ secrets.GITHUB_TOKEN }} \
+            --namespace default \
             --dry-run=client \
             -o yaml | kubectl apply -f -
 
-      # ----------------------------------------------------------
-      # Deploy Kubernetes Manifests
-      # ----------------------------------------------------------
+
+      # ======================================
+      # DEPLOY KUBERNETES MANIFESTS
+      # ======================================
       - name: Deploy to Kubernetes
         run: |
           kubectl apply -f k8s/
           kubectl apply -f monitoring/
 
-      # ----------------------------------------------------------
-      # Update Image
-      # ----------------------------------------------------------
+
+      # ======================================
+      # UPDATE IMAGE
+      # ======================================
       - name: Update Deployment Image
         run: |
           kubectl set image deployment/nginx-deployment \
             nginx=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
             -n default
 
-      # ----------------------------------------------------------
-      # Wait for Rollout
-      # ----------------------------------------------------------
+
+      # ======================================
+      # WAIT FOR ROLLOUT
+      # ======================================
       - name: Monitor Rollout
         run: |
-          kubectl rollout status \
-            deployment/nginx-deployment \
+          kubectl rollout status deployment/nginx-deployment \
             -n default \
             --timeout=5m
 
-      # ----------------------------------------------------------
-      # Show Deployment Status
-      # ----------------------------------------------------------
-      - name: Show Deployment
+
+      # ======================================
+      # SHOW FINAL STATUS
+      # ======================================
+      - name: Verify Deployment
         run: |
           kubectl get deployments -n default
           kubectl get pods -n default
