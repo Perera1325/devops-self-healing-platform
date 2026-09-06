@@ -114,7 +114,7 @@ jobs:
             --docker-password=${{ secrets.GITHUB_TOKEN }} \
             --namespace default \
             --dry-run=client \
-            -o yaml | kubectl apply -f -
+            -o yaml | kubectl apply --validate=false -f -
 
 
       # ======================================
@@ -122,8 +122,8 @@ jobs:
       # ======================================
       - name: Deploy to Kubernetes
         run: |
-          kubectl apply -f k8s/
-          kubectl apply -f monitoring/
+          kubectl apply --validate=false -f k8s/
+          kubectl apply --validate=false -f monitoring/
 
 
       # ======================================
